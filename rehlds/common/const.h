@@ -740,8 +740,8 @@ enum
 };
 
 
-typedef unsigned int	func_t;
-typedef unsigned int	string_t;
+typedef uint64	func_t;
+typedef uint64	string_t;
 
 typedef unsigned char 		byte;
 typedef unsigned short 		word;

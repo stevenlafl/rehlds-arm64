@@ -515,7 +515,7 @@ void SV_AddLinksToPM_(areanode_t *node, float *pmove_mins, float *pmove_maxs)
 {
 	struct link_s *l;
 	edict_t *check;
-	int e;
+	int64 e;
 	physent_t *ve;
 	int i;
 	link_t *next;
@@ -548,6 +548,9 @@ void SV_AddLinksToPM_(areanode_t *node, float *pmove_mins, float *pmove_maxs)
 			continue;
 
 		e = NUM_FOR_EDICT(check);
+		if (e == 0) {
+		    continue;
+		}
 		ve = &pmove->visents[pmove->numvisent];
 		pmove->numvisent = pmove->numvisent + 1;
 		SV_CopyEdictToPhysent(ve, e, check);

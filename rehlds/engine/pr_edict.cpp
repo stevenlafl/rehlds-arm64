@@ -38,7 +38,7 @@ void ED_ClearEdict(edict_t *e)
 
 edict_t *ED_Alloc(void)
 {
-	int i;
+	int64 i;
 	edict_t *e;
 
 	// Search for free entity
@@ -184,7 +184,8 @@ char *ED_ParseEdict(char *data, edict_t *ent)
 
 	if (SuckOutClassname(data, ent))
 	{
-		className = com_token;
+		className = (char *)(pr_strings + ent->v.classname);
+
 		pEntityInit = GetEntityInit(className);
 		if (pEntityInit)
 		{
@@ -345,8 +346,8 @@ void ED_LoadFromFile(char *data)
 		else
 		{
 			ent = g_psv.edicts;
-            ReleaseEntityDLLFields(g_psv.edicts);	// TODO: May be better to call ED_ClearEdict here?
-            InitEntityDLLFields(ent);
+			ReleaseEntityDLLFields(g_psv.edicts);	// TODO: May be better to call ED_ClearEdict here?
+			InitEntityDLLFields(ent);
 		}
 
 		data = ED_ParseEdict(data, ent);
@@ -393,14 +394,17 @@ edict_t *EDICT_NUM(int n)
 	return &g_psv.edicts[n];
 }
 
-int NUM_FOR_EDICT(const edict_t *e)
+int64 NUM_FOR_EDICT(const edict_t *e)
 {
-	int b;
+	int64 b;
 	b = e - g_psv.edicts;
 
 	if (b < 0 || b >= g_psv.num_edicts)
 	{
-		Sys_Error("%s: bad pointer", __func__);
+	    // TODO: bring back
+		//Sys_Error("%s: bad pointer", __func__);
+        //Con_DPrintf("%s: bad pointer. \nEntity classname: %s", __func__, &pr_strings[e->v.classname]);
+		return 0;
 	}
 
 	return b;
@@ -512,6 +516,10 @@ void* EXT_FUNC PvEntPrivateData(edict_t *pEdict)
 
 void EXT_FUNC FreeEntPrivateData(edict_t *pEdict)
 {
+    if (pEdict == NULL) {
+        return;
+    }
+
 	if (pEdict->pvPrivateData)
 	{
 		if (gNewDLLFunctions.pfnOnFreeEntPrivateData)
@@ -650,7 +658,7 @@ void EXT_FUNC CVarRegister(cvar_t *pCvar)
 	}
 }
 
-int EXT_FUNC AllocEngineString(const char *szValue)
+string_t EXT_FUNC AllocEngineString(const char *szValue)
 {
 	return ED_NewString(szValue) - pr_strings;
 }

@@ -254,8 +254,6 @@ target_include_directories(engine PRIVATE
 
 target_compile_definitions(engine PRIVATE
 	SWDS
-	REHLDS_JIT
-	REHLDS_SSE
 	REHLDS_FIXES
 	REHLDS_CHECKS
 	REHLDS_API

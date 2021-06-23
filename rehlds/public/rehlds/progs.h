@@ -75,7 +75,7 @@ void		ED_Free (edict_t *ed);
 void		ED_LoadFromFile (char *data);
 
 edict_t		*EDICT_NUM(int n);
-int			NUM_FOR_EDICT(const edict_t *e);
+int64		NUM_FOR_EDICT(const edict_t *e);
 
 #define PROG_TO_EDICT(e) ((edict_t *)((byte *)sv.edicts + e))
 

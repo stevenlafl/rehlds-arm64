@@ -95,7 +95,7 @@ const char* EXT_FUNC Info_ValueForKey(const char *s, const char *lookup)
 		while (*s != '\\' && *s != '\0')
 			s++;
 
-		size_t valueLen = Q_min(s - value, MAX_KV_LEN - 1);
+		size_t valueLen = Q_min(s - value, long(MAX_KV_LEN - 1));
 
 		if (keyLen == lookupLen && !Q_strncmp(key, lookup, lookupLen))
 		{

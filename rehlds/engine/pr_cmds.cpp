@@ -811,7 +811,7 @@ qboolean EXT_FUNC ValidCmd(const char *pCmd)
 
 void EXT_FUNC PF_stuffcmd_I(edict_t *pEdict, const char *szFmt, ...)
 {
-	int entnum;
+	int64 entnum;
 	client_t *old;
 	va_list argptr;
 	static char szOut[1024];
@@ -935,7 +935,7 @@ edict_t* EXT_FUNC PF_find_Shared(int eStartSearchAfter, int iFieldToMatch, const
 		if (ed->free)
 			continue;
 
-		char* t = &pr_strings[*(string_t*)((size_t)&ed->v + iFieldToMatch)];
+		char* t = &pr_strings[*(string_t*)((uint64)&ed->v + iFieldToMatch)];
 		if (t == 0 || t == &pr_strings[0])
 			continue;
 
@@ -2040,7 +2040,7 @@ void EXT_FUNC PF_RunPlayerMove_I(edict_t *fakeclient, const float *viewangles, f
 
 sizebuf_t* EXT_FUNC WriteDest_Parm(int dest)
 {
-	int entnum;
+	int64 entnum;
 
 	switch (dest)
 	{

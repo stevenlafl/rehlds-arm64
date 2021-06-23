@@ -59,7 +59,7 @@
 #define BIT(n) (1<<(n))
 
 // From engine/pr_comp.h;
-typedef unsigned int string_t;
+typedef unsigned long long string_t;
 
 // From engine/server.h
 typedef enum sv_delta_s

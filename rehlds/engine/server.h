@@ -133,8 +133,8 @@ typedef struct server_s
 	char generic_precache_names[MAX_GENERIC][64];
 	int num_generic_names;
 	const char *lightstyles[MAX_LIGHTSTYLES];
-	int num_edicts;
-	int max_edicts;
+	int64 num_edicts;
+	int64 max_edicts;
 	edict_t *edicts;
 	struct entity_state_s *baselines;
 	extra_baselines_t *instance_baselines;
