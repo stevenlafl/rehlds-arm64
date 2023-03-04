@@ -1657,6 +1657,9 @@ void EXT_FUNC SV_Spawn_f_internal(void)
 	}
 	else
 	{
+#ifdef REHLDS_FIXES
+		host_client->m_bSentNewResponse = FALSE;
+#endif
 		SV_New_f();
 	}
 }
@@ -2113,6 +2116,11 @@ void SV_ReplaceSpecialCharactersInName(char *newname, const char *oldname)
 
 int SV_CheckUserInfo(netadr_t *adr, char *userinfo, qboolean bIsReconnecting, int nReconnectSlot, char *name)
 {
+	return g_RehldsHookchains.m_SV_CheckUserInfo.callChain(SV_CheckUserInfo_internal, adr, userinfo, bIsReconnecting, nReconnectSlot, name);
+}
+
+int EXT_FUNC SV_CheckUserInfo_internal(netadr_t *adr, char *userinfo, qboolean bIsReconnecting, int nReconnectSlot, char *name)
+{
 	const char *s;
 	char newname[MAX_NAME];
 	int proxies;
@@ -2488,6 +2496,7 @@ void EXT_FUNC SV_ConnectClient_internal(void)
 	host_client->fully_connected = FALSE;
 
 #ifdef REHLDS_FIXES
+	host_client->m_bSentNewResponse = FALSE;
 	g_GameClients[host_client - g_psvs.clients]->SetSpawnedOnce(false);
 #endif // REHLDS_FIXES
 
@@ -4021,9 +4030,10 @@ void SV_EmitEvents_internal(client_t *cl, packet_entities_t *pack, sizebuf_t *ms
 }
 
 int fatbytes;
-unsigned char fatpvs[1024];
+unsigned char fatpvs[MAX_MAP_LEAFS / 8];
+
 int fatpasbytes;
-unsigned char fatpas[1024];
+unsigned char fatpas[MAX_MAP_LEAFS / 8];
 
 void SV_AddToFatPVS(vec_t *org, mnode_t *node)
 {
@@ -4064,6 +4074,9 @@ unsigned char* EXT_FUNC SV_FatPVS(float *org)
 	else
 #endif // REHLDS_FIXES
 		fatbytes = (g_psv.worldmodel->numleafs + 31) >> 3;
+
+	if (fatbytes >= (MAX_MAP_LEAFS / 8))
+		Sys_Error("%s: MAX_MAP_LEAFS limit exceeded\n", __func__);
 
 	Q_memset(fatpvs, 0, fatbytes);
 	SV_AddToFatPVS(org, g_psv.worldmodel->nodes);
@@ -4121,6 +4134,9 @@ unsigned char* EXT_FUNC SV_FatPAS(float *org)
 	else
 #endif // REHLDS_FIXES
 		fatpasbytes = (g_psv.worldmodel->numleafs + 31) >> 3;
+
+	if (fatpasbytes >= (MAX_MAP_LEAFS / 8))
+		Sys_Error("%s: MAX_MAP_LEAFS limit exceeded\n", __func__);
 
 	Q_memset(fatpas, 0, fatpasbytes);
 	SV_AddToFatPAS(org, g_psv.worldmodel->nodes);
@@ -4562,7 +4578,16 @@ int EXT_FUNC SV_CheckVisibility(edict_t *entity, unsigned char *pset)
 	}
 }
 
-void SV_EmitPings(client_t *client, sizebuf_t *msg)
+void EXT_FUNC SV_EmitPings_hook(IGameClient *cl, sizebuf_t *msg)
+{
+	SV_EmitPings_internal(cl->GetClient(), msg);
+}
+
+void SV_EmitPings(client_t *client, sizebuf_t *msg) {
+	g_RehldsHookchains.m_SV_EmitPings.callChain(SV_EmitPings_hook, GetRehldsApiClient(client), msg);
+}
+
+void EXT_FUNC SV_EmitPings_internal(client_t *client, sizebuf_t *msg)
 {
 	int ping;
 	int packet_loss;
@@ -5107,7 +5132,17 @@ int SV_ModelIndex(const char *name)
 	Sys_Error("%s: SV_ModelIndex: model %s not precached", __func__, name);
 }
 
+void EXT_FUNC SV_AddResource_hook(resourcetype_t type, const char *name, int size, unsigned char flags, int index)
+{
+	SV_AddResource_internal(type, name, size, flags, index);
+}
+
 void EXT_FUNC SV_AddResource(resourcetype_t type, const char *name, int size, unsigned char flags, int index)
+{
+	g_RehldsHookchains.m_SV_AddResource.callChain(SV_AddResource_hook, type, name, size, flags, index);
+}
+
+void SV_AddResource_internal(resourcetype_t type, const char *name, int size, unsigned char flags, int index)
 {
 	resource_t *r;
 #ifdef REHLDS_FIXES
@@ -6127,7 +6162,7 @@ int SV_SpawnServer(qboolean bIsDemo, char *server, char *startspot)
 	if (g_psvs.maxclients <= 1)
 	{
 		int row = (g_psv.worldmodel->numleafs + 7) / 8;
-		if (row < 0 || row > MODEL_MAX_PVS)
+		if (row < 0 || row > (MAX_MAP_LEAFS / 8))
 		{
 			Sys_Error("%s: oversized g_psv.worldmodel->numleafs: %i", __func__, g_psv.worldmodel->numleafs);
 		}
