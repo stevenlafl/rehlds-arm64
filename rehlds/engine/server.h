@@ -405,7 +405,6 @@ enum GameType_e
 
 extern GameType_e g_eGameType;
 
-extern int fatbytes;
 extern int giNextUserMsg;
 extern int hashstrings_collisions;
 
@@ -417,10 +416,6 @@ extern delta_t *g_pweapondelta;
 #ifdef REHLDS_OPT_PEDANTIC
 extern delta_t *g_pusercmddelta;
 #endif
-
-extern unsigned char fatpvs[1024];
-extern int fatpasbytes;
-extern unsigned char fatpas[1024];
 
 extern int gPacketSuppressed;
 
@@ -498,6 +493,7 @@ int SV_CheckKeyInfo_internal(netadr_t *adr, char *protinfo, unsigned short *port
 int SV_CheckForDuplicateSteamID(client_t *client);
 qboolean SV_CheckForDuplicateNames(char *userinfo, qboolean bIsReconnecting, int nExcludeSlot);
 int SV_CheckUserInfo(netadr_t *adr, char *userinfo, qboolean bIsReconnecting, int nReconnectSlot, char *name);
+int SV_CheckUserInfo_internal(netadr_t *adr, char *userinfo, qboolean bIsReconnecting, int nReconnectSlot, char *name);
 int SV_FindEmptySlot(netadr_t *adr, int *pslot, client_t ** ppClient);
 void SV_ConnectClient(void);
 void SV_ConnectClient_internal(void);
@@ -558,6 +554,7 @@ NOXREF qboolean SV_HasEventsInQueue(client_t *client);
 void SV_GetNetInfo(client_t *client, int *ping, int *packet_loss);
 int SV_CheckVisibility(edict_t *entity, unsigned char *pset);
 void SV_EmitPings(client_t *client, sizebuf_t *msg);
+void SV_EmitPings_internal(client_t *client, sizebuf_t *msg);
 void SV_WriteEntitiesToClient(client_t *client, sizebuf_t *msg);
 void SV_CleanupEnts(void);
 qboolean SV_SendClientDatagram(client_t *client);
@@ -568,6 +565,7 @@ void SV_SendClientMessages(void);
 void SV_ExtractFromUserinfo(client_t *cl);
 int SV_ModelIndex(const char *name);
 void SV_AddResource(resourcetype_t type, const char *name, int size, unsigned char flags, int index);
+void SV_AddResource_internal(resourcetype_t type, const char *name, int size, unsigned char flags, int index);
 size_t SV_CountResourceByType(resourcetype_t type, resource_t **pResourceList = nullptr, size_t nListMax = 0, size_t *nWidthFileNameMax = nullptr);
 void SV_CreateGenericResources(void);
 void SV_CreateResourceList(void);
